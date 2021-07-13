@@ -1,4 +1,4 @@
-classdef EKF_range_based
+classdef LKF_xy_based
    properties
       x_est
       P_est
@@ -18,7 +18,7 @@ classdef EKF_range_based
       bx
    end
    methods
-      function obj = EKF_range_based()
+      function obj = LKF_xy_based()
           scene = Params.get_scene();
           obj.bx = scene.bx;
           
@@ -35,19 +35,19 @@ classdef EKF_range_based
           
           % define h for range measurements:
           obj.R = @(deltas_var) diag(deltas_var);
-          A1 = [1 0 0 0; 0 0 1 0]; % selector matrix
-          obj.h = @(x_vect) sqrt(sum((A1*x_vect - obj.bx).^2,1)); 
+          obj.H = [1 0 0 0; 0 0 1 0];
+          obj.h = @(x_vect) obj.H*x_vect; % just a projection
           
-          % linearized version of 'h':
-          obj.H = @(x_vect, h_hat) (1./h_hat).*((A1.'*(A1*x_vect - obj.bx)).');
-          '';
       end
+      
       function obj = set_x0(obj,x_0)
           obj.x_est = ([1 0 0 0; 0 0 1 0].')*x_0;
           obj.x_est = obj.x_est + [0,rand(1),0,rand(1)].';
           obj.P_est = 10*eye(4);
           obj.eig_P_est = eig(obj.P_est);
           obj.eig_P_pred = obj.eig_P_est;
+          
+          obj.x_pred = obj.x_est;
           '';
       end
       
@@ -57,25 +57,20 @@ classdef EKF_range_based
           obj.eig_P_pred = eig(obj.P_pred);
       end
       
-      
       function obj = correct(obj, z_mean, z_var)
-          % z_mean, z_var = ranges.
-          z_hat = (obj.h(obj.x_pred)).';
-
-          Hk = obj.H(obj.x_pred,z_hat);
-                    
-          % inovation:
-          y = z_mean - z_hat;
-          S = Hk*obj.P_pred*(Hk.') + obj.R(z_var);
-                    
+          % innovation:
+          y = z_mean - obj.h(obj.x_pred);
+          S = obj.H*obj.P_pred*(obj.H.') + z_var;
+          
           % kalman gain:
-          K = obj.P_pred*(Hk.')*pinv(S);
+          K = obj.P_pred*(obj.H.')*pinv(S);
           
           % correction:
           obj.x_est = obj.x_pred + K*y;
-          obj.P_est = obj.P_pred - K*S*(K.');
+          %obj.P_est = obj.P_pred - K*S*(K.');
+          obj.P_est = obj.P_pred - K*obj.H*obj.P_pred;
           obj.eig_P_est = eig(obj.P_est);
       end
-      
+
    end
 end

@@ -28,14 +28,15 @@ classdef UKF_range_based
           obj.bx = scene.bx;
           
           % define f as constant velocity model:
-          kf_params = Params.get_kf_params();
+          [kf_params, ekf_params, ukf_params] = Params.get_kf_params();
+          
           obj.var_v = kf_params.var_v;
           obj.A = @(T) [1 T 0 0;
                         0 1 0 0;
                         0 0 1 T;
                         0 0 0 1];
           obj.f = @(T,x)obj.A(T)*x;
-          Qx = @(T,var_v) [0.5*T^2; T]*var_v*([0.5*T^2; T].');
+          Qx = @(T,var_v) [0.5*(T^2); T]*var_v*([0.5*(T^2); T].');
           obj.Q = @(T,var_v)[Qx(T,var_v) zeros(2,2); zeros(2,2) Qx(T,var_v)];
           
           % define h for range measurements:
@@ -44,9 +45,9 @@ classdef UKF_range_based
           obj.h = @(x_vect) sqrt(sum((A1*x_vect - obj.bx).^2,1)); 
           
           % get sigma weights
-          obj.alpha = kf_params.alpha;
-          obj.beta = kf_params.beta;
-          obj.kappa = kf_params.kappa;
+          obj.alpha = ukf_params.alpha;
+          obj.beta = ukf_params.beta;
+          obj.kappa = ukf_params.kappa;
           n = 4;
           [obj.sig_wm, obj.sig_wc] = sigma_weights(n,obj.alpha, obj.beta, obj.kappa);
           '';

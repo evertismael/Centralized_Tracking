@@ -6,7 +6,7 @@ syms t
 % constant velocity model: but we could have a non-linear system here
 R = 20;
 w0 = sqrt(sum(x0([2,4]).^2))/R;
-t1 = 0; t2 = 2*1.5*pi/w0;
+t1 = 0; t2 = 2*4*pi/w0;
 law_vx = @(x_init,v_init,t_init,t) sqrt(sum(v_init.^2))*cos(w0*(t-t_init));
 law_vy = @(x_init,v_init,t_init,t) sqrt(sum(v_init.^2))*sin(w0*(t-t_init));
 law_x = @(x_init,v_init,t_init,t) x_init(1) + int(law_vx(x_init,v_init,t_init,t),t,t_init,t);

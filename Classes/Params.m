@@ -67,8 +67,8 @@ classdef Params
        function gs = get_grid_search()
            scene = Params.get_scene();
            gs = {};
-           gs.x_min = 0; gs.x_max = max(scene.bx(1,:),[],'all'); gs.Nx = 90;
-           gs.y_min = 0; gs.y_max = max(scene.bx(2,:),[],'all'); gs.Ny = 90;
+           gs.x_min = 0; gs.x_max = max(scene.bx(1,:),[],'all'); gs.Nx = 50;
+           gs.y_min = 0; gs.y_max = max(scene.bx(2,:),[],'all'); gs.Ny = 50;
            gs.r_min = 0; gs.r_max = 150; gs.Nr = 200;
            
            gs.dx = (gs.x_max - gs.x_min)/gs.Nx;
@@ -78,6 +78,10 @@ classdef Params
            gs.x = (gs.x_min:gs.dx:gs.x_max-gs.dx).';
            gs.y = (gs.y_min:gs.dy:gs.y_max-gs.dy);
            gs.r = (gs.r_min:gs.dr:gs.r_max-gs.dr).';
+           
+           % 2D R
+           gs.delta = sqrt((gs.x - reshape(scene.bx(1,:),1,1,4)).^2 + (gs.y - reshape(scene.bx(2,:),1,1,4)).^2);
+           gs.delta = reshape(gs.delta,gs.Nx,gs.Ny,1,4);
        end
        
        function comm = get_communication()
@@ -91,11 +95,11 @@ classdef Params
            comm.deltaPhi = 2*pi*comm.B/(comm.N_pilot*comm.c);
            comm.Nbps = 2;
            
-           tmp.pilot_idx_rng = (1:comm.N_pilot);
-           tmp.phi_rng = comm.deltaPhi*tmp.pilot_idx_rng;
-           comm.phi_rng = reshape(tmp.phi_rng,[1,1,1,1,comm.N_pilot]);
+           comm.pilot_idx_rng = (1:comm.N_pilot);
+           comm.phi_rng = comm.deltaPhi*comm.pilot_idx_rng;
+           comm.phi_rng = reshape(comm.phi_rng,[1,1,1,1,comm.N_pilot]);
            
-           comm.SNR_db = 20;
+           comm.SNR_db = -0;
            comm.noise_type = 'SNR_20m'; % noise_type: SNR_20m/ SNR_center / same
        end
        
@@ -107,12 +111,21 @@ classdef Params
            end
        end
        
-       function kf_params = get_kf_params()
+       function [kf_params, ekf_params, ukf_params] = get_kf_params()
            kf_params = {};
-           kf_params.alpha = 0.2; 
-           kf_params.beta = 0;%3-4; %3-n;
-           kf_params.kappa = 2;
-           kf_params.var_v = 5;%0.091;
+           ekf_params = {};
+           ukf_params = {};
+           
+           sigma_a = (20^2/20)*0.5;
+           sigma_v = sqrt(10);
+           kf_params.var_a = sigma_a^2;
+           kf_params.var_v = sigma_v^2;
+           kf_params.N_iter = 1;
+
+           ukf_params.alpha = 0.2; 
+           ukf_params.beta = 3-4; %3-n;
+           ukf_params.kappa = 2;
+           
        end
    end
 end

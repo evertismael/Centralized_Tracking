@@ -72,7 +72,7 @@ classdef BSs
               w = sqrt(obj.vars/2).*(randn(size(obj.pilot_rx)) + 1j*randn(size(obj.pilot_rx)));
               
               SNR_i_db = 10*log10(SNR_i);
-              obj.active_bs = SNR_i_db > -15; % it detects if SNR bigger than 15 db
+              obj.active_bs = SNR_i_db > -30; % it detects if SNR bigger than 15 db
           else
               w = zeros(size(obj.pilot_rx));
               obj.active_bs = ones(1,size(obj.bx,2)); % TODO
