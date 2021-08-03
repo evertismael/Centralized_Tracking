@@ -45,7 +45,7 @@ classdef DPEKF_bsbnd_based
           obj.P_est = 10*eye(2);
           obj.eig_P_est = eig(obj.P_est);
           obj.eig_P_pred = obj.eig_P_est;
-          obj.u = 100* rand(2,1);% obj.x_est([2,4]);
+          obj.u = 1* rand(2,1);
           '';
      end
       function obj = predict(obj, T)
