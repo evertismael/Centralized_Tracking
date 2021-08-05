@@ -2,12 +2,13 @@ clear; clc; close all;
 addpath('Classes')  
 addpath('Helpers') 
 addpath('Targets') 
-%rng(2)
+rng(2)
 % -------------------------------------------------------------------------
 % 1.- Define & Generate target trajetories
 % -------------------------------------------------------------------------
 dt = (1e-1);
-target = oval_trayectory();
+%target = oval_trayectory();
+target = car_up_left_v2();
 target = target.gen_trayectory(dt);
 
 % -------------------------------------------------------------------------
@@ -19,7 +20,9 @@ fc = FC();
 
 % trackers:
 dpekf = DPEKF_bsbnd_based();
-sspekf = SSPEKF_bsbnd_based_comp_sspe();
+%sspekf = SSPEKF_bsbnd_based_comp_sspe();
+sspekf = SSPEKF_bsbnd_based_comp_nhop();
+sspekf_lkf = SSPEKF_bsbnd_based_comp_lkf();
 
 % params and hist
 scene = Params.get_scene();
@@ -45,8 +48,8 @@ for t_idx = 1:N_t
     bss = bss.channel_propagation(target.history(:,t_idx));
     [xy_bsbnd, varxy_bsbnd] = fc.dpe(bss.pilot_rx, bss.vars, bss.pilot_tx);
     
-    xy_0 = xy_true + 0* randn(2,1);
-    xy_0_v = repmat(xy_true,1,scene.N_bs) + 0* randn(2,scene.N_bs);
+    xy_0 = xy_true + 1* randn(2,1);
+    xy_0_v = repmat(xy_true,1,scene.N_bs) + 1* randn(2,scene.N_bs);
     if t_idx == 1
         dpekf = dpekf.set_x0(xy_0);
         sspekf = sspekf.set_x0(xy_0_v);

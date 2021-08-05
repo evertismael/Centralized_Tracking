@@ -7,7 +7,9 @@ addpath('Targets')
 % 1.- Define & Generate target trajetories
 % -------------------------------------------------------------------------
 dt = (1e-1);
-target = oval_trayectory();
+%target = oval_trayectory();
+%target = car_up_left();
+target = car_up_left_v2();
 target = target.gen_trayectory(dt);
 
 % -------------------------------------------------------------------------
@@ -57,7 +59,7 @@ for t_idx = 1:N_t
         dpekf = dpekf.correct(bss,dt);
     end
     
-    % ______________________________________________
+    % ___________________________________   ___________
     % save for history:
     deltas_hist(:,t_idx) = deltas_mean;
     xy_toa_hist(:,t_idx) = xy_bsbnd;
@@ -71,19 +73,19 @@ for t_idx = 1:N_t
     eig_Pdpekf_pred_hist(:,t_idx) = dpekf.eig_P_pred;
 end
 
-fig1 = figure('Position',[1925 847 560 420]);
+fig1 = figure('Position',[25   547   560   420]);
 show_target_and_xy_toa_in_state_space(fig1,target,xy_toa_hist);
 
-fig2 = figure('Position',[2577 858 560 420]);
+fig2 = figure('Position',[1351 549 570 413]);
 show_target_and_tracker(fig2, target, xy_iekf_hist,eig_Piekf_est_hist,eig_Piekf_pred_hist, 'IEKF');
 
-fig3 = figure('Position',[3211 571 570 413]);
+fig3 = figure('Position',[74 1 570 413]);
 show_target_and_tracker(fig3, target, xy_dpekf_hist,eig_Pdpekf_est_hist,eig_Pdpekf_pred_hist, 'DPEKF');
 
 fig4 = figure('Position',[1943 38 560 420]);
 show_target_meas_xy_toa_in_meas_space(fig4,target,xy_toa_hist, deltas_hist);
 
-fig6 = figure('Position',[3159 42 560 420]);
+fig6 = figure('Position',[683 275 560 420]);
 kfs = {xy_dpekf_hist,xy_iekf_hist};
 kfs_labels = {'DPEKF','IEKF'};
 show_rmse_comparison(fig6,target,kfs, kfs_labels);

@@ -89,9 +89,10 @@ classdef SSPEKF_bsbnd_based
           for iter_idx = 1:obj.N_iter
               vj = vi;
               for bs_idx=1:scene.N_bs
-                  sum_vj(:,:,1,bs_idx) = sum(vj(:,:,:,1:end~=bs_idx),4);
+                  sum_vj(:,:,1,bs_idx) = sum(vj(:,:,:,network.A(bs_idx,:)),4);
               end
-              v_dot = meas_v + network.beta*(sum_vj - scene.N_bs*vi);
+              network_D = reshape(network.D,1,1,1,scene.N_bs);
+              v_dot = meas_v + network.beta*(sum_vj - network_D.*vi);
               vi = vi + v_dot;
           end
           [xy_mean_v, xy_var_v] = sspe_vi_dot_moments(v_dot);

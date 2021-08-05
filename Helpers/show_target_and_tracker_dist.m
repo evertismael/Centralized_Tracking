@@ -30,6 +30,7 @@ figure(fig)
     title('vy');ylim([-25,Inf]); % legend();
 
     subplot(2,3,6); hold on; grid on;
+    draw_scene();
     plt_params = Params.get_plot();
     axis(plt_params.xy_axis);
     plot(target.history(1,:),target.history(3,:),'--','DisplayName','true','LineWidth',2);
@@ -37,7 +38,7 @@ figure(fig)
         plot(squeeze(tracks(1,i,:)),squeeze(tracks(3,i,:)),'DisplayName',[tracker_label,'-',num2str(i)]);
     end
     title('xy-plane');
-    legend();
+    %legend();
     
     subplot(2,3,3); hold on;
     for i=1:N_bs

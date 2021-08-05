@@ -60,7 +60,7 @@ classdef Params
            comm.phi_rng = comm.deltaPhi*comm.pilot_idx_rng;
            comm.phi_rng = reshape(comm.phi_rng,[1,1,1,1,comm.N_pilot]);
            
-           comm.SNR_db = -10;
+           comm.SNR_db = -5;
            comm.noise_type = 'SNR_20m'; % noise_type: SNR_20m/ SNR_center / same
        end
        
@@ -92,7 +92,10 @@ classdef Params
            end
            network.A = logical(network.A);
            network.D = reshape(sum(network.A,2),1,scene.N_bs);
-           network.beta = 0.15;
+           % optimum beta:
+           eig_L = sort(eig(diag(network.D) - network.A));
+           network.beta = 0.8*(2/(eig_L(end) + eig_L(2)));
+           %network.beta = 0.15;
        end
        
        function plt = get_plot()

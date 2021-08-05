@@ -21,12 +21,13 @@ figure(fig)
     title('vy');ylim([-25,Inf]); % legend();
 
     subplot(2,3,6); hold on; grid on;
+    draw_scene();
     plt_params = Params.get_plot();
     axis(plt_params.xy_axis);
     plot(target.history(1,:),target.history(3,:),'--','DisplayName','true','LineWidth',2);
     plot(track(1,:),track(3,:),'DisplayName',tracker_label);
     title('xy-plane'); 
-    legend();
+    %legend();
     
     subplot(2,3,3); hold on;
     plot(target.t_vect,eig_P_est_hist,'--','DisplayName','est')

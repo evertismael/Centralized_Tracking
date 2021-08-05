@@ -7,7 +7,9 @@ addpath('Targets')
 % 1.- Define & Generate target trajetories
 % -------------------------------------------------------------------------
 dt = (1e-1);
-target = oval_trayectory();
+%target = oval_trayectory();
+%target = car_up_left();
+target = car_up_left_v2();
 target = target.gen_trayectory(dt);
 
 % -------------------------------------------------------------------------

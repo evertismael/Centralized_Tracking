@@ -79,9 +79,9 @@ classdef SSPEKF_bsbnd_based_comp_nhop
           for iter_idx = 1:obj.N_iter
               vj = sspe_vi_decompress(msg);
               for bs_idx=1:scene.N_bs
-                  sum_vj(:,:,1,bs_idx) = sum(vj(:,:,:,1:end~=bs_idx),4);
+                  sum_vj(:,:,1,bs_idx) = sum(vj(:,:,:,network.A(bs_idx,:)),4);
               end
-              v_dot = llk_grid + network.beta*(sum_vj - scene.N_bs*vi);
+              v_dot = llk_grid + network.beta*(sum_vj - reshape(network.D,1,1,1,scene.N_bs).*vi);
               vi = vi + v_dot;
               msg = sspe_vi_compress(vi);
           end
