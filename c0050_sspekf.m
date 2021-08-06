@@ -2,7 +2,7 @@ clear; clc; close all;
 addpath('Classes')  
 addpath('Helpers') 
 addpath('Targets') 
-rng(2)
+%rng(2)
 % -------------------------------------------------------------------------
 % 1.- Define & Generate target trajetories
 % -------------------------------------------------------------------------
@@ -20,9 +20,10 @@ fc = FC();
 
 % trackers:
 dpekf = DPEKF_bsbnd_based();
-%sspekf = SSPEKF_bsbnd_based_comp_sspe();
-sspekf = SSPEKF_bsbnd_based_comp_nhop();
-sspekf_lkf = SSPEKF_bsbnd_based_comp_lkf();
+sspekf = SSPEKF_bsbnd_based_comp_sspe();
+%sspekf = SSPEKF_bsbnd_based_comp_nhop();
+%sspekf_lkf = SSPEKF_bsbnd_based_lkf_ind();
+sspekf_lkf = SSPEKF_bsbnd_based_lkf_all();
 
 % params and hist
 scene = Params.get_scene();
@@ -35,10 +36,13 @@ xy_dpekf_hist = zeros(4,N_t);
 eig_Pdpekf_est_hist = zeros(2,N_t);
 eig_Pdpekf_pred_hist = zeros(2,N_t);
 
-
 xy_sspekf_hist = zeros(4,scene.N_bs,N_t);
 eig_Psspekf_est_hist = zeros(2,scene.N_bs,N_t);
 eig_Psspekf_pred_hist = zeros(2,scene.N_bs,N_t);
+
+xy_sspekf_lkf_hist = zeros(4,scene.N_bs,N_t);
+eig_Psspekf_lkf_est_hist = zeros(2,scene.N_bs,N_t);
+eig_Psspekf_lkf_pred_hist = zeros(2,scene.N_bs,N_t);
 
 for t_idx = 1:N_t
     target.history(:,t_idx)
@@ -53,12 +57,17 @@ for t_idx = 1:N_t
     if t_idx == 1
         dpekf = dpekf.set_x0(xy_0);
         sspekf = sspekf.set_x0(xy_0_v);
+        sspekf_lkf = sspekf_lkf.set_x0(xy_0_v);
     else
         dpekf = dpekf.predict(dt);
         dpekf = dpekf.correct(bss,dt);
         
         sspekf = sspekf.predict(dt);
         sspekf = sspekf.correct(bss,dt,t_idx);
+        
+        
+        sspekf_lkf = sspekf_lkf.predict(dt);
+        sspekf_lkf = sspekf_lkf.correct(bss,dt,t_idx);
     end
     
     % ______________________________________________
@@ -76,6 +85,11 @@ for t_idx = 1:N_t
     eig_Psspekf_est_hist(:,:,t_idx) = sspekf.eig_P_est_v;
     eig_Psspekf_pred_hist(:,:,t_idx) = sspekf.eig_P_pred_v;
     
+    % sspekf_lkf
+    xy_sspekf_lkf_hist(:,:,t_idx) = sspekf_lkf.x_plot;
+    eig_Psspekf_lkf_est_hist(:,:,t_idx) = sspekf_lkf.eig_P_est_v;
+    eig_Psspekf_lkf_pred_hist(:,:,t_idx) = sspekf_lkf.eig_P_pred_v;
+    
 end
 
 fig1 = figure('Position',[25   547   560   420]);
@@ -87,7 +101,15 @@ show_target_and_tracker(fig2, target, xy_dpekf_hist,eig_Pdpekf_est_hist,eig_Pdpe
 fig3 = figure('Position',[74 1 570 413]);
 show_target_and_tracker_dist(fig3, target, xy_sspekf_hist,eig_Psspekf_est_hist,eig_Psspekf_pred_hist, 'SSPEKF');
 
-fig4 = figure('Position',[1943 38 560 420]);
+fig5 = figure('Position',[680 558 560 420]);
+show_target_and_tracker_dist(fig5, target, xy_sspekf_lkf_hist,eig_Psspekf_lkf_est_hist,eig_Psspekf_lkf_pred_hist, 'SSPEKF-LKF');
+
+fig4 = figure('Position',[1355 53 560 420]);
 kfs = {xy_dpekf_hist,xy_sspekf_hist(:,1,:),xy_sspekf_hist(:,2,:),xy_sspekf_hist(:,3,:),xy_sspekf_hist(:,4,:)};
 kfs_labels = {'DPEKF','SSPEKF-bs1','SSPEKF-bs2','SSPEKF-bs3','SSPEKF-bs4'};
 show_rmse_comparison(fig4,target,kfs, kfs_labels);
+
+fig6 = figure('Position',[662 62 560 420]);
+kfs = {xy_dpekf_hist,xy_sspekf_lkf_hist(:,1,:),xy_sspekf_lkf_hist(:,2,:),xy_sspekf_lkf_hist(:,3,:),xy_sspekf_lkf_hist(:,4,:)};
+kfs_labels = {'DPEKF','SSPEKF-LKF-bs1','SSPEKF-LKF-bs2','SSPEKF-LKF-bs3','SSPEKF-LKF-bs4'};
+show_rmse_comparison(fig6,target,kfs, kfs_labels);

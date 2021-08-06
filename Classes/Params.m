@@ -60,7 +60,7 @@ classdef Params
            comm.phi_rng = comm.deltaPhi*comm.pilot_idx_rng;
            comm.phi_rng = reshape(comm.phi_rng,[1,1,1,1,comm.N_pilot]);
            
-           comm.SNR_db = -5;
+           comm.SNR_db = -8;
            comm.noise_type = 'SNR_20m'; % noise_type: SNR_20m/ SNR_center / same
        end
        
